@@ -1,16 +1,24 @@
 import User from "./User";
 
 class Meet {
-    constructor(private _id: string, private _name: string, private _host: User, private _friends: User[]) {}
+    constructor(private _id: string, private _name: string, private _host: User, private _friends: User[] = []) {}
 
 
     private findUser(id: string): User | undefined {
         return this.friends.find(friend => friend.id === id);    
     }
 
-    public addUser(id: string) {
-        const user = this.findUser(id);
-        if (user instanceof User) this.friends = [...this.friends, user]
+    private findUserBySocketId (socket_id: string): User | undefined {
+        return this.friends.find(friend => friend.socket_id === socket_id);
+    }
+
+    public addUser(user: User) {
+        this.friends = [...this.friends, user];
+    }
+
+    public removeUser(id: string) {
+        const user = this.findUserBySocketId(id);
+        this.friends = this.friends.filter(friend => friend !== user);
     }
 
     get friends(): User[] {

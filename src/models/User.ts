@@ -1,5 +1,17 @@
 class User {
-    constructor(private _id: string, private _name: string, private _host: boolean = false) {}
+    constructor(private _id: string, 
+        private _name: string, 
+        private _socket_id: string | undefined = undefined
+    ) {}
+
+    set socket_id(id: string | undefined) {
+        this._socket_id = id;
+    }
+
+    get socket_id() {
+        return this._socket_id;
+    }
+
 
     get id() {
         return this._id;
@@ -15,14 +27,6 @@ class User {
 
     set name(name: string) {
         this._name = name;
-    }
-
-    get host() {
-        return this._host;
-    }
-
-    set host(host: boolean) {
-        this._host = host;
     }
 }
 
