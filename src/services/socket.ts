@@ -84,6 +84,35 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
         }
     })
 
+    socket.on("createConsumerTransport", async (data, callback) => {
+        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        if (!user) throw new Error("User not found")
+        if (!meeting) throw new Error("Meeting not found")
+        if (!meeting.router) throw new Error("User is not connected")
+
+        const { params, transport } = await createWebRTCTransport(meeting.router);
+
+        user.consumeTransport = transport;
+        callback(params);
+    })
+
+    socket.on("connectConsumerTransport", async (data, callback) => {
+        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        if (!user) throw new Error("User not found")
+        if (!meeting) throw new Error("Meeting not found")
+        if (!meeting.router) throw new Error("User is not connected")
+
+        const transport = user.consumeTransport;
+
+        try {
+            await transport.connect({ dtlsParameters: data.dtlsParameters })
+        } catch(e) {
+            console.error(e);
+        } finally {
+            callback();
+        }
+    })
+
     socket.on('disconnect', () => {
         const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
         if (meeting instanceof Meet) meeting.removeUser(socket.id);
