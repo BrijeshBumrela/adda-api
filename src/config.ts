@@ -50,6 +50,12 @@ const mediaCodecs: msTypes.RtpCodecCapability[] = [
   }
 ]
 
+const listenIps: msTypes.TransportListenIp[] = [
+  {
+    ip: '127.0.0.1',
+  }
+]
+
 export default {
     listenPort: 3000,
     mediasoup: {
@@ -75,12 +81,7 @@ export default {
             mediaCodecs
         },
         webRtcTransport: {
-            listenIps: [
-              {
-                ip: '127.0.0.1',
-                announcedIp: null,
-              }
-            ],
+            listenIps,
             maxIncomingBitrate: 838860800,
             initialAvailableOutgoingBitrate: 838860800
         }

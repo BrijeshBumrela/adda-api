@@ -5,10 +5,24 @@ export default (meetings: Meet[]) => {
     const findMeeting = (id: string) => meetings.find(meeting => meeting.id === id);
 
     const findUser = (id: string, field?: string) => {
-        return meetings.find(meeting => {
-            if (!field) return meeting.id === id
-            return meeting[field] === id;
-        });
+        const key = field || 'id';
+
+        let user: User | undefined;
+
+        meetings.forEach(meeting => {
+            if (meeting.host && meeting.host[key] === id) {
+                user = meeting.host;
+                return;
+            }
+            meeting.friends.forEach(friend => {
+                if (friend[key] === id) {
+                    user = friend;
+                    return;
+                }
+            })
+        })
+
+        return user;
     }
 
     // this function takes two arguments

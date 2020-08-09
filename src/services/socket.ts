@@ -4,10 +4,12 @@ import utils from '../utils/utils'
 import User from "../models/User";
 import { v4 as uuid4 } from 'uuid';
 import { types as msTypes } from 'mediasoup';
+import msServices from '../services/mediasoup';
 import config from "../config";
 
 export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[]) => {
     const { findUserAndMeeting, findMeeting, genRandNumber, findUser } = utils(meetings);
+    const { createWebRTCTransport } = msServices();
 
     const { name, 
         meetName, 
@@ -48,11 +50,24 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
     socket.join(meeting.id);
 
     socket.on('getRouterCapabilities', (data, callback) => {
-        const user = findUser(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
         if (!user) throw new Error("User not found")
-        if (!user.router) throw new Error("User is not connected")
-        callback(user.router.rtpCapabilities);
+        if (!meeting) throw new Error("Meeting not found")
+        callback(meeting.router.rtpCapabilities);
     })
+
+    socket.on("createProducerTransport", async (data, callback) => {
+        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        if (!user) throw new Error("User not found")
+        if (!meeting) throw new Error("Meeting not found")
+        if (!meeting.router) throw new Error("User is not connected")
+
+        const { params, transport } = await createWebRTCTransport(meeting.router);
+
+        user.produceTransport = transport;
+        callback(params);
+    })
+
 
     socket.on('disconnect', () => {
         const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');

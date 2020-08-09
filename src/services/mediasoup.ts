@@ -1,6 +1,7 @@
 import os from 'os';
 import * as mediasoup from 'mediasoup';
 import { types as msTypes } from 'mediasoup';
+import config from '../config';
 
 
 export default () => {
@@ -16,5 +17,30 @@ export default () => {
         }
     }
 
-    return { createMsWorkers };
+    const createWebRTCTransport = async (router: msTypes.Router) => {
+        const { maxIncomingBitrate, initialAvailableOutgoingBitrate } = config.mediasoup.webRtcTransport;
+
+        const transport = await router.createWebRtcTransport({
+            listenIps: config.mediasoup.webRtcTransport.listenIps,
+            enableUdp: true
+        })
+
+        if (maxIncomingBitrate) {
+            await transport.setMaxIncomingBitrate(maxIncomingBitrate);
+        }
+
+        const { iceParameters, iceCandidates, dtlsParameters } = transport;
+
+        return {
+            params: {
+                id: transport.id,
+                iceParameters,
+                iceCandidates,
+                dtlsParameters
+            }, 
+            transport
+        }
+    }
+
+    return { createMsWorkers, createWebRTCTransport };
 }
