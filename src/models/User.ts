@@ -3,8 +3,8 @@ import { types as msTypes } from 'mediasoup';
 class User {
     private consumers: msTypes.Consumer[] = [];
     private _producer: msTypes.Producer;
-    private _produceTransport: msTypes.Transport;
-    private _consumeTransport: msTypes.Transport;
+    private _produceTransport: msTypes.WebRtcTransport;
+    private _consumeTransport: msTypes.WebRtcTransport;
 
 
     constructor(private _id: string, 
@@ -16,7 +16,7 @@ class User {
         return this._produceTransport;
     }
 
-    set produceTransport(transport: msTypes.Transport) {
+    set produceTransport(transport: msTypes.WebRtcTransport) {
         this._produceTransport = transport;
     }
 
@@ -24,7 +24,7 @@ class User {
         return this._consumeTransport;
     }
 
-    set consumeTransport(transport: msTypes.Transport) {
+    set consumeTransport(transport: msTypes.WebRtcTransport) {
         this._consumeTransport = transport;
     }
 

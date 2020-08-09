@@ -22,7 +22,6 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
     } = socket.handshake.query;
 
 
-
     const user = new User(uuid4(), name);
     let meeting: Meet;
 
@@ -68,6 +67,22 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
         callback(params);
     })
 
+    socket.on("connectProducerTransport", async (data, callback) => {
+        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        if (!user) throw new Error("User not found")
+        if (!meeting) throw new Error("Meeting not found")
+        if (!meeting.router) throw new Error("User is not connected")
+
+        const transport = user.produceTransport;
+
+        try {
+            await transport.connect({ dtlsParameters: data.dtlsParameters })
+        } catch(e) {
+            console.error(e);
+        } finally {
+            callback();
+        }
+    })
 
     socket.on('disconnect', () => {
         const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
