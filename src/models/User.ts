@@ -1,8 +1,29 @@
+import { types as msTypes } from 'mediasoup';
+
 class User {
+    private consumers: msTypes.Consumer[] = [];
+    private _producer: msTypes.Producer;
+
     constructor(private _id: string, 
         private _name: string, 
         private _socket_id: string | undefined = undefined
     ) {}
+
+    public addConsumer(consumer: msTypes.Consumer) {
+        this.consumers.push(consumer);
+    }
+
+    public removeConsumer(consumer: msTypes.Consumer) {
+        this.consumers = this.consumers.filter(each => each.id !== consumer.id);
+    }
+
+    set producer(producer: msTypes.Producer) {
+        this._producer = producer
+    }
+
+    get producer() {
+        return this._producer;
+    }
 
     set socket_id(id: string | undefined) {
         this._socket_id = id;
@@ -11,7 +32,6 @@ class User {
     get socket_id() {
         return this._socket_id;
     }
-
 
     get id() {
         return this._id;

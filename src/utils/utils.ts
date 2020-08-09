@@ -4,6 +4,12 @@ import Meet from "../models/Meet";
 export default (meetings: Meet[]) => {
     const findMeeting = (id: string) => meetings.find(meeting => meeting.id === id);
 
+    const findUser = (id: string, field?: string) => {
+        return meetings.find(meeting => {
+            if (!field) return meeting.id === id
+            return meeting[field] === id;
+        });
+    }
 
     // this function takes two arguments
     /**
@@ -32,5 +38,5 @@ export default (meetings: Meet[]) => {
         return Math.floor(Math.random() * array.length);
     }
 
-    return { findMeeting, findUserAndMeeting, genRandNumber }
+    return { findMeeting, findUserAndMeeting, genRandNumber, findUser }
 }

@@ -7,7 +7,7 @@ import { types as msTypes } from 'mediasoup';
 import config from "../config";
 
 export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[]) => {
-    const { findUserAndMeeting, findMeeting, genRandNumber } = utils(meetings);
+    const { findUserAndMeeting, findMeeting, genRandNumber, findUser } = utils(meetings);
 
     const { name, 
         meetName, 
@@ -48,9 +48,11 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
     socket.join(meeting.id);
 
     socket.on('getRouterCapabilities', (data, callback) => {
-
+        const user = findUser(socket.id, 'socket_id');
+        if (!user) throw new Error("User not found")
+        if (!user.router) throw new Error("User is not connected")
+        callback(user.router.rtpCapabilities);
     })
-
 
     socket.on('disconnect', () => {
         const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
