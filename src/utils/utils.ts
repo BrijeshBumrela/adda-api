@@ -28,5 +28,9 @@ export default (meetings: Meet[]) => {
         return [user, userMeeting];
     }
 
-    return { findMeeting, findUserAndMeeting }
+    const genRandNumber = (array: Array<any>) => {
+        return Math.floor(Math.random() * array.length);
+    }
+
+    return { findMeeting, findUserAndMeeting, genRandNumber }
 }

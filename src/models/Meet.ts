@@ -1,8 +1,19 @@
 import User from "./User";
+import { types as msTypes } from 'mediasoup';
 
 class Meet {
+    public _router: msTypes.Router;
+
     constructor(private _id: string, private _name: string, private _host: User, private _friends: User[] = []) {}
 
+
+    set router(router: msTypes.Router) {
+        this._router = router;
+    }
+
+    get router() {
+        return this._router;
+    }
 
     private findUser(id: string): User | undefined {
         return this.friends.find(friend => friend.id === id);    

@@ -6,7 +6,6 @@ import socketService from './services/socket';
 import bodyParser from 'body-parser';
 import { types as msTypes } from 'mediasoup';
 import msServices from './services/mediasoup';
-import apiServices from './services/api';
 
 const app = express()
 const server = http.createServer(app);
@@ -15,19 +14,15 @@ const io = socket(server);
 server.listen(8000);
 app.use(bodyParser.json());
 
+// List of meetings that are currently going on
 const meetings: Meet[] = [];
+
+// List of workers used by mediasoup to create the routers(rooms)
 const workers: msTypes.Worker[] = [];
 
 
 const { createMsWorkers } = msServices();
-const { routes } = apiServices(meetings);
-
-app.use('/', routes);
 
 createMsWorkers(workers);
 
-io.on('connection', socket => socketService(socket, meetings))
-
-
-
-
+io.on('connection', socket => socketService(socket, meetings, workers))
