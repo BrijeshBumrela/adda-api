@@ -10,10 +10,6 @@ export default (meetings: Meet[]) => {
         let user: User | undefined;
 
         meetings.forEach(meeting => {
-            if (meeting.host && meeting.host[key] === id) {
-                user = meeting.host;
-                return;
-            }
             meeting.friends.forEach(friend => {
                 if (friend[key] === id) {
                     user = friend;

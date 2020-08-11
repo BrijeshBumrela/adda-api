@@ -4,7 +4,7 @@ import { types as msTypes } from 'mediasoup';
 class Meet {
     public _router: msTypes.Router;
 
-    constructor(private _id: string, private _name: string, private _host: User, private _friends: User[] = []) {}
+    constructor(private _id: string, private _name: string, private _friends: User[] = []) {}
 
 
     set router(router: msTypes.Router) {
@@ -54,14 +54,6 @@ class Meet {
 
     set name(name: string) {
         this._name = name;
-    }
-
-    get host() {
-        return this._host;
-    }
-
-    set host(host: User) {
-        this._host = host;
     }
 }
 

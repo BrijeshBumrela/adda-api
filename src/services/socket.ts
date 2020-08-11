@@ -5,15 +5,12 @@ import User from "../models/User";
 import { v4 as uuid4 } from 'uuid';
 import { types as msTypes } from 'mediasoup';
 import msServices from '../services/mediasoup';
-import config from "../config";
 
 export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[]) => {
-    const { findUserAndMeeting, findMeeting, genRandNumber, findUser } = utils(meetings);
+    const { findUserAndMeeting, findMeeting } = utils(meetings);
     const { createWebRTCTransport } = msServices();
 
     const { name, 
-        meetName, 
-        isHost, 
         meetingId 
     }: { name: string; 
         meetName?: string; 
@@ -23,28 +20,11 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
 
 
     const user = new User(uuid4(), name);
-    let meeting: Meet;
+    const meeting = findMeeting(meetingId);
 
-    if (meetName && isHost) {
-        /**
-         * Create a new meeting
-        */
-        meeting = new Meet(uuid4(), meetName, user);
+    if (!meeting) throw new Error("Meeting not found");
 
-        /**
-         * Assigning a new router
-        */
-        const selectedWorker = workers[genRandNumber(workers)]
-        const router = await selectedWorker.createRouter({ mediaCodecs: config.mediasoup.router.mediaCodecs })
-        meeting.router = router;
-
-
-    } else {
-        const getMeeting = findMeeting(meetingId);
-        if (!getMeeting) throw new Error("Meeting not found")
-        meeting = getMeeting;
-        meeting.addUser(user);
-    }
+    meeting.addUser(user);
 
     socket.join(meeting.id);
 
