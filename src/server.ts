@@ -28,4 +28,4 @@ const { router: apiRouter } = apiServices(meetings, workers);
 app.use(apiRouter)
 createMsWorkers(workers);
 
-io.on('connection', socket => socketService(socket, meetings, workers))
+io.on('connection', socket => socketService(socket, meetings))

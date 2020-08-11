@@ -3,21 +3,13 @@ import Meet from "../models/Meet";
 import utils from '../utils/utils'
 import User from "../models/User";
 import { v4 as uuid4 } from 'uuid';
-import { types as msTypes } from 'mediasoup';
 import msServices from '../services/mediasoup';
 
-export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[]) => {
+export default async (socket: Socket, meetings: Meet[]) => {
     const { findUserAndMeeting, findMeeting } = utils(meetings);
     const { createWebRTCTransport } = msServices();
 
-    const { name, 
-        meetingId 
-    }: { name: string; 
-        meetName?: string; 
-        isHost?: boolean; 
-        meetingId: string 
-    } = socket.handshake.query;
-
+    const { name, meetingId }: { name: string; meetingId: string } = socket.handshake.query;
 
     const user = new User(uuid4(), name);
     const meeting = findMeeting(meetingId);
@@ -95,8 +87,13 @@ export default async (socket: Socket, meetings: Meet[], workers: msTypes.Worker[
 
     socket.on('disconnect', () => {
         const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
-        if (meeting instanceof Meet) meeting.removeUser(socket.id);
+        if (meeting instanceof Meet) {
+            meeting.removeUser(socket.id);
+            socket.to(meeting.id).emit("UserUpdated", meeting.friends);
+        }
     })
+
+    socket.to(meeting.id).emit("UserUpdated", meeting.friends);
 }
 
 
