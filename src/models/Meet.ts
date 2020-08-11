@@ -20,7 +20,7 @@ class Meet {
     }
 
     private findUserBySocketId (socket_id: string): User | undefined {
-        return this.friends.find(friend => friend.socket_id === socket_id);
+        return this.friends.find(friend => friend.id === socket_id);
     }
 
     public addUser(user: User) {

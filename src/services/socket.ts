@@ -1,17 +1,16 @@
-import { Socket } from "socket.io";
+import { Socket, Server } from "socket.io";
 import Meet from "../models/Meet";
 import utils from '../utils/utils'
 import User from "../models/User";
-import { v4 as uuid4 } from 'uuid';
 import msServices from '../services/mediasoup';
 
-export default async (socket: Socket, meetings: Meet[]) => {
+export default async (socket: Socket, meetings: Meet[], io: Server) => {
     const { findUserAndMeeting, findMeeting } = utils(meetings);
     const { createWebRTCTransport } = msServices();
 
     const { name, meetingId }: { name: string; meetingId: string } = socket.handshake.query;
 
-    const user = new User(uuid4(), name);
+    const user = new User(socket.id, name);
     const meeting = findMeeting(meetingId);
 
     if (!meeting) throw new Error("Meeting not found");
@@ -21,14 +20,15 @@ export default async (socket: Socket, meetings: Meet[]) => {
     socket.join(meeting.id);
 
     socket.on('getRouterCapabilities', (data, callback) => {
-        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id);
         if (!user) throw new Error("User not found")
         if (!meeting) throw new Error("Meeting not found")
+        console.log(meeting.router);
         callback(meeting.router.rtpCapabilities);
     })
 
     socket.on("createProducerTransport", async (data, callback) => {
-        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id);
         if (!user) throw new Error("User not found")
         if (!meeting) throw new Error("Meeting not found")
         if (!meeting.router) throw new Error("User is not connected")
@@ -40,7 +40,7 @@ export default async (socket: Socket, meetings: Meet[]) => {
     })
 
     socket.on("connectProducerTransport", async (data, callback) => {
-        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id);
         if (!user) throw new Error("User not found")
         if (!meeting) throw new Error("Meeting not found")
         if (!meeting.router) throw new Error("User is not connected")
@@ -57,7 +57,7 @@ export default async (socket: Socket, meetings: Meet[]) => {
     })
 
     socket.on("createConsumerTransport", async (data, callback) => {
-        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id);
         if (!user) throw new Error("User not found")
         if (!meeting) throw new Error("Meeting not found")
         if (!meeting.router) throw new Error("User is not connected")
@@ -69,7 +69,7 @@ export default async (socket: Socket, meetings: Meet[]) => {
     })
 
     socket.on("connectConsumerTransport", async (data, callback) => {
-        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id);
         if (!user) throw new Error("User not found")
         if (!meeting) throw new Error("Meeting not found")
         if (!meeting.router) throw new Error("User is not connected")
@@ -86,14 +86,17 @@ export default async (socket: Socket, meetings: Meet[]) => {
     })
 
     socket.on('disconnect', () => {
-        const [user, meeting] = findUserAndMeeting(socket.id, 'socket_id');
+        const [user, meeting] = findUserAndMeeting(socket.id);
         if (meeting instanceof Meet) {
             meeting.removeUser(socket.id);
-            socket.to(meeting.id).emit("UserUpdated", meeting.friends);
+
+            // Inform all room members about leaving of a member
+            io.in(meeting.id).emit("UserUpdated",  meeting.friends.map(friend => ({ name: friend.name, id: friend.id })));
         }
     })
 
-    socket.to(meeting.id).emit("UserUpdated", meeting.friends);
+    // Inform all room members about the addition of new member
+    io.in(meeting.id).emit("UserUpdated", meeting.friends.map(friend => ({ name: friend.name, id: friend.id })));
 }
 
 

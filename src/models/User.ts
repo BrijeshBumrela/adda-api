@@ -7,9 +7,9 @@ class User {
     private _consumeTransport: msTypes.WebRtcTransport;
 
 
-    constructor(private _id: string, 
-        private _name: string, 
-        private _socket_id: string | undefined = undefined
+    constructor(
+        public id: string, 
+        public name: string, 
     ) {}
 
     get produceTransport() {
@@ -42,30 +42,6 @@ class User {
 
     get producer() {
         return this._producer;
-    }
-
-    set socket_id(id: string | undefined) {
-        this._socket_id = id;
-    }
-
-    get socket_id() {
-        return this._socket_id;
-    }
-
-    get id() {
-        return this._id;
-    }
-
-    set id(id: string) {
-        this._id = id;
-    }
-
-    get name() {
-        return this._name;
-    }
-
-    set name(name: string) {
-        this._name = name;
     }
 }
 

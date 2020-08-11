@@ -27,13 +27,15 @@ export default (meetings: Meet[]) => {
      * @param id - value of the string that is to be compared in the friends array
      * @param field - (optional) field that you want to compare (default `id`)
      */
-    const findUserAndMeeting = (id: string, field: string = id): [ User | null, Meet | null ] => {
+    const findUserAndMeeting = (id: string, field?: string): [ User | null, Meet | null ] => {
         let user: User | null = null;
         let userMeeting: Meet | null = null;
     
+        const key = field || 'id';
+
         meetings.forEach(meeting => {
             meeting.friends.forEach(friend => {
-                if (friend[field] === id) {
+                if (friend[key] === id) {
                     user = friend;
                     userMeeting = meeting;
                     return;
