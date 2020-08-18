@@ -191,6 +191,16 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
         }
     })
 
+    socket.on('getusers', (data, callback) => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+        const prevUsers = meeting.friends
+            .map(friend => ({ id: friend.id, name: friend.name }))
+            .filter(friend => friend.id !== user.id)
+
+        callback(prevUsers);
+    })
+
     // Inform all room members about the addition of new member
     io.in(meeting.id).emit("UserAdded", { name: user.name, id: user.id });
 }
