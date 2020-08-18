@@ -8,6 +8,7 @@ import { types as msTypes } from 'mediasoup';
 import msServices from './services/mediasoup';
 import apiServices from './services/api';
 import cors from 'cors';
+import config from './config';
 
 const app = express()
 const server = http.createServer(app);
@@ -31,6 +32,18 @@ const { createMsWorkers } = msServices();
 const { router: apiRouter } = apiServices(meetings, workers);
 
 app.use(apiRouter)
-createMsWorkers(workers);
 
 io.on('connection', socket => socketService(socket, meetings, io))
+
+const somebullshit = async () => {
+    // 4ac8423a-4f11-47e8-abfe-0dcc1e46dc09
+    await createMsWorkers(workers);
+    const meeting = new Meet("4ac8423a-4f11-47e8-abfe-0dcc1e46dc09", "my meet");
+    meetings.push(meeting);
+
+    const selectedWorker = workers[0]
+    const router = await selectedWorker.createRouter({ mediaCodecs: config.mediasoup.router.mediaCodecs })
+    meeting.router = router;
+}
+
+somebullshit()

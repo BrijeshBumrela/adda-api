@@ -36,6 +36,10 @@ class User {
         this.consumers = this.consumers.filter(each => each.id !== consumer.id);
     }
 
+    public getConsumer(id: string) {
+        return this.consumers.find(consumer => consumer.id === id);
+    }
+
     set producer(producer: msTypes.Producer) {
         this._producer = producer
     }

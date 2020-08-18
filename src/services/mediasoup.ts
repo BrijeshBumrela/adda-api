@@ -42,5 +42,45 @@ export default () => {
         }
     }
 
-    return { createMsWorkers, createWebRTCTransport };
+    const createConsumer = async (
+        producer: msTypes.Producer, 
+        rtpCapabilities: msTypes.RtpCapabilities, 
+        transport: msTypes.Transport,
+        router: msTypes.Router    
+    ) => {
+
+        if (!router.canConsume({ producerId: producer.id, rtpCapabilities })) {
+            console.error("router can not consume");
+            return;
+        }
+
+        try {
+            const consumer = await transport.consume({
+                producerId: producer.id,
+                rtpCapabilities,
+                paused: true
+            })
+
+            if (consumer.type === "simulcast") {
+                await consumer.setPreferredLayers({ spatialLayer: 2, temporalLayer: 2 });
+            }
+
+            return {
+                consumer,
+                meta: {
+                    producerId: producer.id,
+                    id: consumer.id,
+                    kind: consumer.kind,
+                    rtpParameters: consumer.rtpParameters,
+                    type: consumer.type,
+                    producerPaused: consumer.producerPaused
+                }
+            };
+        } catch (error) {
+            console.error("consume failed", error);
+            return;
+        }
+    }
+
+    return { createMsWorkers, createWebRTCTransport, createConsumer };
 }

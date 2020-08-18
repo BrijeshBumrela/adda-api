@@ -3,6 +3,7 @@ import { types as msTypes } from 'mediasoup';
 
 class Meet {
     public _router: msTypes.Router;
+    public host: User;
 
     constructor(private _id: string, private _name: string, private _friends: User[] = []) {}
 
@@ -15,21 +16,29 @@ class Meet {
         return this._router;
     }
 
-    private findUser(id: string): User | undefined {
-        return this.friends.find(friend => friend.id === id);    
-    }
-
     private findUserBySocketId (socket_id: string): User | undefined {
         return this.friends.find(friend => friend.id === socket_id);
     }
 
     public addUser(user: User) {
+        if (this.friends.length === 0) this.host = user; 
         this.friends = [...this.friends, user];
     }
 
     public removeUser(id: string) {
         const user = this.findUserBySocketId(id);
+        if (this.friends.length === 0) return;
         this.friends = this.friends.filter(friend => friend !== user);
+        this.setHost();
+    }
+
+    private setHost() {
+        if (this.friends.length === 0) return;
+        this.host = this.friends[0];
+    }
+
+    public getHost() {
+        return this.friends[0];
     }
 
     get friends(): User[] {
