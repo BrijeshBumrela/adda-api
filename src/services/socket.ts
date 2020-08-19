@@ -137,9 +137,35 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
 
         const { consumer, meta } = result;
 
+
+        consumer.on('producerpause', async () => {
+            await consumer.pause();
+            socket.to(meeting.id).emit("consumerPause", { consumerId: consumer.id })
+        })
+        
+
+        consumer.on('producerresume', async () => {
+            await consumer.resume();
+            socket.to(meeting.id).emit("consumerResume", { consumerId: consumer.id })
+        })
+
         user.addConsumer(consumer);
 
         callback(meta);
+    })
+
+    socket.on('pauseProducer', async ({ producerUserId }: { producerUserId: string }, callback) => {
+        const [user, meeting] = findUserAndMeeting(producerUserId);
+        if (!user || !meeting) throw new Error("User not found");
+        await user.producer.pause();
+        callback();
+    })
+
+    socket.on('resumeProducer', async ({ producerUserId }: { producerUserId: string }, callback) => {
+        const [user, meeting] = findUserAndMeeting(producerUserId);
+        if (!user || !meeting) throw new Error("User not found");
+        await user.producer.resume();
+        callback();
     })
 
     socket.on('resume', async (data, callback) => {
@@ -195,9 +221,9 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
         const [user, meeting] = findUserAndMeeting(socket.id);
         if (!meeting || !user) throw new Error("Meeting not found");
         const prevUsers = meeting.friends
-            .map(friend => ({ id: friend.id, name: friend.name }))
             .filter(friend => friend.id !== user.id)
-
+            .map(friend => ({ id: friend.id, name: friend.name }))
+            
         callback(prevUsers);
     })
 
