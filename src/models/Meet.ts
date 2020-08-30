@@ -1,9 +1,15 @@
 import User from "./User";
 import { types as msTypes } from 'mediasoup';
 
+interface Song {
+    id: string,
+    name: string,
+}
+
 class Meet {
     public _router: msTypes.Router;
     public host: User;
+    public songs: Song[] = [];
 
     constructor(private _id: string, private _name: string, private _friends: User[] = []) {}
 
@@ -32,9 +38,17 @@ class Meet {
         this.setHost();
     }
 
+    public isHost(user: User) {
+        return user.id === (this.host && this.host.id);
+    }
+
     private setHost() {
         if (this.friends.length === 0) return;
         this.host = this.friends[0];
+    }
+
+    public nextSong() {
+        this.songs.shift();
     }
 
     public getHost() {

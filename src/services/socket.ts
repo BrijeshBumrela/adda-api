@@ -207,8 +207,9 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
 
             const newHost = meeting.getHost();
 
-            if (host !== newHost) {
+            if (host.id !== newHost.id) {
                 // * Send socket stating the user about becoming the host
+                io.in(meeting.id).emit("newHost", { hostId: newHost.id })
             }
 
 
@@ -225,6 +226,49 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
             .map(friend => ({ id: friend.id, name: friend.name }))
             
         callback(prevUsers);
+    })
+
+    socket.on('messageSend', (data: string) => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+        socket.to(meeting.id).emit('messageRecv', data);
+    })
+
+    socket.on('pauseSend', () => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+
+        if (meeting.isHost(user)) {
+            socket.to(meeting.id).emit('pauseRecv');
+        }
+    })
+
+    socket.on('playSend', () => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+
+        if (meeting.isHost(user)) {
+            socket.to(meeting.id).emit('playRecv');
+        }
+    })
+
+    socket.on('seekSend', (seconds: number) => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+
+        if (meeting.isHost(user)) {
+            socket.to(meeting.id).emit('seekRecv', seconds);
+        }
+    })
+
+    socket.on('nextSend', () => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+
+        if (meeting.isHost(user)) {
+            meeting.nextSong();
+            socket.to(meeting.id).emit('nextRecv');
+        }
     })
 
     // Inform all room members about the addition of new member
