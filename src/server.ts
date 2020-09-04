@@ -19,10 +19,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // List of meetings that are currently going on
-const meetings: Meet[] = [];
-
-const tempMeeting = new Meet('8ebc7dcb-e660-47d7-9f51-0b0483382f9a', 'something');
-meetings.push(tempMeeting)
+let meetings: Meet[] = [];
 
 // List of workers used by mediasoup to create the routers(rooms)
 const workers: msTypes.Worker[] = [];
@@ -45,5 +42,9 @@ const somebullshit = async () => {
     const router = await selectedWorker.createRouter({ mediaCodecs: config.mediasoup.router.mediaCodecs })
     meeting.router = router;
 }
+
+setInterval(() => {
+    meetings = meetings.filter(meeting => meeting.friends.length > 0);
+}, 900000)
 
 somebullshit()

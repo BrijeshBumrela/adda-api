@@ -18,7 +18,7 @@ export default (meetings: Meet[], workers: msTypes.Worker[]) => {
         /**
          * Assigning a new router
         */
-        const selectedWorker = workers[genRandNumber(workers)]
+        const selectedWorker = workers[genRandNumber(workers.length)]
         const router = await selectedWorker.createRouter({ mediaCodecs: config.mediasoup.router.mediaCodecs })
         meeting.router = router;
 

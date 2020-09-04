@@ -231,7 +231,7 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
     socket.on('messageSend', (data: string) => {
         const [user, meeting] = findUserAndMeeting(socket.id);
         if (!meeting || !user) throw new Error("Meeting not found");
-        socket.to(meeting.id).emit('messageRecv', data);
+        socket.to(meeting.id).emit('messageRecv', { message: data, user: user.name });
     })
 
     socket.on('pauseSend', () => {
