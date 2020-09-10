@@ -271,6 +271,29 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
         }
     })
 
+    socket.on('getExistingAudioProducers', (_, cb) => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+
+        const existingProducers = meeting.friends.filter(friend => friend.producer && !friend.producer.paused).map(friend => ({ id: friend.id, kind: friend.producer.kind }))
+        cb(existingProducers);
+    })
+
+    socket.on('queueSend', (songs, cb) => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+
+        meeting.songs = songs;
+
+        socket.to(meeting.id).emit('queueRecv', songs)
+    })
+
+    socket.on('queueRecv', (_, cb) => {
+        const [user, meeting] = findUserAndMeeting(socket.id);
+        if (!meeting || !user) throw new Error("Meeting not found");
+        cb(meeting.songs);
+    })
+
     // Inform all room members about the addition of new member
     io.in(meeting.id).emit("UserAdded", { name: user.name, id: user.id });
 }
