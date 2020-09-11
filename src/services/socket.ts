@@ -140,13 +140,13 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
 
         consumer.on('producerpause', async () => {
             await consumer.pause();
-            socket.to(meeting.id).emit("consumerPause", { consumerId: consumer.id })
+            socket.to(user.id).emit("consumerPause", { producerId: consumer.producerId })
         })
         
 
         consumer.on('producerresume', async () => {
             await consumer.resume();
-            socket.to(meeting.id).emit("consumerResume", { consumerId: consumer.id })
+            socket.to(user.id).emit("consumerResume", { producerId: consumer.producerId })
         })
 
         user.addConsumer(consumer);
