@@ -31,7 +31,8 @@ app.use(apiRouter);
 
 io.on("connection", socket => socketService(socket, meetings, io));
 
-const somebullshit = async () => {
+
+(async () => {
   // 4ac8423a-4f11-47e8-abfe-0dcc1e46dc09
   await createMsWorkers(workers);
   const meeting = new Meet("4ac8423a-4f11-47e8-abfe-0dcc1e46dc09", "my meet");
@@ -42,10 +43,9 @@ const somebullshit = async () => {
     mediaCodecs: config.mediasoup.router.mediaCodecs
   });
   meeting.router = router;
-};
+})()
 
 setInterval(() => {
   meetings = meetings.filter(meeting => meeting.friends.length > 0);
 }, 900000);
 
-somebullshit();

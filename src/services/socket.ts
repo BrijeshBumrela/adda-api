@@ -21,6 +21,8 @@ export default async (socket: Socket, meetings: Meet[], io: Server) => {
 
     meeting.addUser(user);
 
+    console.log('connected by socket');
+
     socket.join(meeting.id);
 
     socket.on("getRouterCapabilities", (data, callback) => {
