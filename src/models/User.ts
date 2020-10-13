@@ -6,11 +6,7 @@ class User {
     private _produceTransport: msTypes.WebRtcTransport;
     private _consumeTransport: msTypes.WebRtcTransport;
 
-
-    constructor(
-        public id: string, 
-        public name: string, 
-    ) {}
+    constructor(public id: string, public name: string) {}
 
     get produceTransport() {
         return this._produceTransport;
@@ -41,7 +37,7 @@ class User {
     }
 
     set producer(producer: msTypes.Producer) {
-        this._producer = producer
+        this._producer = producer;
     }
 
     get producer() {
